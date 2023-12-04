@@ -19,7 +19,7 @@ from mushroomapp import urls, views
 
 urlpatterns = [
 
-    path('admin', admin.site.urls),
+    path('admin/', admin.site.urls),
     path('', include('mushroomapp.urls'))
 
 ]

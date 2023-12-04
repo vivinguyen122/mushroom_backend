@@ -15,26 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
-from rest_framework import routers
-from mushroomapp import views, urls
-
-# router = routers.DefaultRouter()
-# router.register(r'forums', views.ForumView, 'forum')
+from mushroomapp import urls, views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include(urls)),
 
-    # re_path(r'^api/forms/$', views.ForumApiView.as_view()),
+    path('admin', admin.site.urls),
+    path('', views.index, name="index")
 
-    re_path(r'^api/forums/$', views.forum_list), #get list of forums add add new forum
-    # re_path(r'^api/forums/$', views.forum_detail), # delete forum and update forum
-
-    # re_path(r'^api/forms/([3-4])$', views.ForumApiView.as_view()),
-    # path('api/', views.ForumApiView.as_view())
-
-    # path('api/forums/$', views.forum_list),  # get list of forums add add new forum
-
-    # my po2 test
-    path('api/forums/<int:pk>/', views.ForumDetail.as_view(), name='forum-view')
 ]

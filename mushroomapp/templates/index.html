@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+</head>
+<body>
+<h1>Index</h1>
+<ul>
+    {% for forum in forums %}
+    <li>
+        {{forum.title}}
+        {{forum.datetime}}
+        {{forum.user}}
+        {{forum.description}}
+    </li>
+    {% endfor %}
+</ul>
+</body>
+</html>

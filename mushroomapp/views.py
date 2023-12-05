@@ -1,12 +1,9 @@
 from django.shortcuts import render
-from django.views.generic import DetailView
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-
-from .models import Forum, Post
 from .serializers import *
+from .models import *
 from rest_framework import viewsets, permissions, status
 
 
@@ -20,58 +17,94 @@ class ForumApiView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
 
     # get all forum posts data
-    # @api_view(['GET', 'POST'])
-    def get(self, request, *args, **kwargs):
-        forums = Forum.objects
-        serializer = ForumSerializer(forums, many=True)
+    def get(self, request, *args, **kwargs):  # get list of posts WORKS ----------
+        posts = Forum.objects
+        serializer = ForumSerializer(posts, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def post(self, request, *args, **kwargs):  # add new post WORKS
+        data = {
+            'title': request.data.get('title'),
+            'description': request.data.get('description'),
+            'user': request.user.id,
+        }
 
-# from my po2
-
-class ForumDetail(DetailView):
-    model = Forum
-    context_object_name = 'forum'
-#
-
-@api_view(['GET', 'POST'])
-def forum_list(request):
-    if request.method == 'GET':
-
-        forums = Forum.objects.all()
-        serializer = ForumSerializer(forums, context={'request': request}, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    elif request.method == 'POST':
-        serializer = ForumSerializer(data=request.data)
+        serializer = ForumSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['PUT', 'DELETE'])
-def forum_detail(request, user):
-    try:
-        user_num = Forum.objects.get(user=user)
-    except:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+# from my po2
 
-    serializer = ForumSerializer(user_num, data=request.data, context={'request': request}, many=True)
+class PostApiView(APIView):
+    def get(request, *args, **kwargs):  # get list of posts WORKS ----------
+        posts = Post.objects
+        serializer = PostSerializer(posts, many=True)
 
-    if request.method == 'PUT':
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):  # add new post WORKS
+        data = {
+            'title': request.data.get('title'),
+            'description': request.data.get('description'),
+            # 'img': request.data.get('img'),
+            'user': request.user.id  # user who's logged in is the one whose id is automatically placed
+        }
+
+        serializer = PostSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
-        user.delete()
 
-        return Response(serializer.errors, status=status.HTTP_204_NO_CONTENT)
+class PostDetailView(APIView):  # get specific post. add request.user.id if want to make it view by same account only
+    def get_obj(self, post_id):
+        try:
+            return Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return None
+
+    def get(self, request, post_id, *args, **kwargs):  # based on id, grab the info. needs get_obj() from above WORKS --
+        post_instance = self.get_obj(post_id)
+        if not post_instance:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = PostSerializer(post_instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, post_id, *args, **kwargs):  # update post by the id WORKS -------
+        post_instance = self.get_obj(post_id)
+        if not post_instance:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        data = {
+            'title': request.data.get('title', post_instance.title),  # optional for user to edit fields
+            'description': request.data.get('description', post_instance.description),
+            'img': request.data.get('img', post_instance.img)
+        }
+
+        if 'img' not in request.data:  # lets me update and not get error because didn't put an img
+            del data['img']
+
+        serializer = PostSerializer(instance=post_instance, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, post_id, *args, **kwargs):  # deletes the post WORKS ----------
+        post_instance = self.get_obj(post_id)
+        if not post_instance:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        post_instance.delete()
+
+        return Response(status=status.HTTP_200_OK)
+

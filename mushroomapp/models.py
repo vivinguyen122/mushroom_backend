@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class Forum(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    datetime = models.DateTimeField()
+    datetime = models.DateTimeField(auto_now_add=True)  # make the field auto add current time and date
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # must be filled out
 
     def __str__(self):
@@ -17,7 +17,7 @@ class Post(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     img = models.FileField(upload_to='uploads', blank=True)  # blank = true makes it optional field
-    datetime = models.DateTimeField()
+    datetime = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):

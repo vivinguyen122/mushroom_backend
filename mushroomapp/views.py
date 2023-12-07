@@ -10,6 +10,8 @@ from rest_framework import status
 from .serializers import *
 from .models import *
 from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import api_view, permission_classes
+
 
 
 def index(request):

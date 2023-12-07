@@ -1,5 +1,7 @@
+from django.conf.urls.static import static
 from django.urls import path, include
 from mushroomapp import views
+from mushroomproject import settings
 
 urlpatterns = [
 
@@ -11,6 +13,7 @@ urlpatterns = [
     path('api/forums/<int:forum_id>/', views.ForumDetailView.as_view(), name='posts-detail-api-view'),  # show api page w forum details
 
     path('', views.index, name='index-view'),  # show index page
-
-
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
